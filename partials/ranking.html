@@ -1,0 +1,17 @@
+<div>
+    <img ng-src="img/{{img}}" alt="">
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Ranking</th>
+            <th>Public Golf Course</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="course in rankings">
+            <td>{{course.rank}}</td>
+            <td>{{course.name}}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
