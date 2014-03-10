@@ -1,29 +1,65 @@
 var app = angular.module('app', []);
 
 app.config(function ($locationProvider, $routeProvider) {
+	//
+	// routing to home tab
+	//
     $routeProvider.when("/", {templateUrl:"partials/home.html"});
-
+    
+    // 
+    // routing to state page with ajax call
+    //
     $routeProvider.when("/:state", {
+
         templateUrl:"partials/ranking.html",
+        //
+        // controller for state tab.
+        // the rankings parameter is the 
+        // data set resolved by promise
+        //
         controller :function ($scope, $routeParams, rankings) {
             $scope.img = $routeParams.state + ".jpg";
+
             $scope.rankings = rankings;
         },
+        //
+        // resove property.
+    	// All the view and controller will not get created 
+    	// and instantiated until the promise get satisfied.
+    	//
         resolve    :{
             rankings:function ($q, $route, $timeout) {
+            	//
+            	// use angular promise library
+            	// create a deferred object
+            	//
                 var deferred = $q.defer();
-
+                
+                //
+                // cannot using $routeParams.state, 
+                // because $routeParams.state can only be resolved 
+                // after the routing get changed.
+                //
                 var state = $route.current.params.state;
 
                 var successCb = function (result) {
                     if (angular.equals(result, [])) {
+                    	//
+                    	// no data found, reject the promise
+                    	//
                         deferred.reject("No state found by that name");
                     }
                     else {
+                    	//
+                    	// found data, resove the promise
+                    	// pass resoved result to rankings propertity
+                    	//
                         deferred.resolve(result);
                     }
                 };
-                //the timeout is only to simulate an ajax call
+                //
+                // this timeout is only to use to simulate an time consuming ajax call
+                //
                 $timeout(function () {
                     
                     var dataNY = [   
@@ -63,7 +99,9 @@ app.config(function ($locationProvider, $routeProvider) {
 								} 
                        
                 }, 2000);
-
+                //
+            	// return a promise.
+            	//
                 return deferred.promise;
             }
         }
@@ -71,12 +109,21 @@ app.config(function ($locationProvider, $routeProvider) {
     });
 });
 
+//
+// main controller
+//
 function AppCtrl($scope, $rootScope, $location) {
+	//
+	// handle the route change start event
+	//
     $rootScope.$on("$routeChangeStart", function (event, next, current) {
         $scope.alertType = "";
         $scope.alertMessage = "Loading...";
         $scope.active = "progress-striped active progress-warning";
     });
+    //
+    // handle the route change success event
+    //
     $rootScope.$on("$routeChangeSuccess", function (event, current, previous) {
         $scope.alertType = "alert-success";
         $scope.alertMessage = "Successfully changed routes :)";
@@ -84,6 +131,10 @@ function AppCtrl($scope, $rootScope, $location) {
 
         $scope.newLocation = $location.path();
     });
+    //
+    // handle the route chage error event
+    // notice the reject reason passed as 4th parameter here
+    //
     $rootScope.$on("$routeChangeError", function (event, current, previous, rejection) {
         alert("ROUTE CHANGE ERROR: " + rejection);
         $scope.alertType = "alert-error";
